@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Price Prediction</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+        }
+        form {
+            width: 50%;
+            background: #fff;
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            background: #007BFF;
+            color: white;
+            padding: 10px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: #fff;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Car Price Prediction</h2>
+
+    <form id="carForm">
+        <label>Make:</label>
+        <select name="Make" required>
+            <option>Ford</option>
+            <option>Honda</option>
+            <option>Toyota</option>
+            <option>BMW</option>
+            <option>Chevrolet</option>
+        </select>
+
+        <label>Model:</label>
+        <select name="Model" required>
+            <option>Civic</option>
+            <option>Mustang</option>
+            <option>Camry</option>
+            <option>Accord</option>
+            <option>Explorer</option>
+        </select>
+
+        <label>Engine Fuel Type:</label>
+        <select name="Engine Fuel Type" required>
+            <option>Gasoline</option>
+            <option>Diesel</option>
+            <option>Electric</option>
+            <option>Hybrid</option>
+            <option>Natural Gas</option>
+        </select>
+
+        <label>Engine HP:</label><input type="number" name="Engine HP" required>
+        <label>Engine Cylinders:</label><input type="number" name="Engine Cylinders" required>
+
+        <label>Transmission Type:</label>
+        <select name="Transmission Type" required>
+            <option>Automatic</option>
+            <option>Manual</option>
+            <option>CVT</option>
+            <option>Dual-Clutch</option>
+            <option>Semi-Automatic</option>
+        </select>
+
+        <label>Driven Wheels:</label>
+        <select name="Driven_Wheels" required>
+            <option>Front-Wheel Drive</option>
+            <option>Rear-Wheel Drive</option>
+            <option>All-Wheel Drive</option>
+            <option>Four-Wheel Drive</option>
+            <option>Part-Time 4WD</option>
+        </select>
+
+        <label>Number of Doors:</label><input type="number" name="Number of Doors" required>
+
+        <label>Market Category:</label>
+        <select name="Market Category" required>
+            <option>Luxury</option>
+            <option>Performance</option>
+            <option>Economy</option>
+            <option>Family</option>
+            <option>Off-Road</option>
+        </select>
+
+        <label>Vehicle Size:</label>
+        <select name="Vehicle Size" required>
+            <option>Compact</option>
+            <option>Midsize</option>
+            <option>Full-Size</option>
+            <option>Subcompact</option>
+            <option>Large</option>
+        </select>
+
+        <label>Vehicle Style:</label>
+        <select name="Vehicle Style" required>
+            <option>Sedan</option>
+            <option>SUV</option>
+            <option>Coupe</option>
+            <option>Truck</option>
+            <option>Convertible</option>
+        </select>
+
+        <label>Highway MPG:</label><input type="number" name="highway MPG" required>
+        <label>City MPG:</label><input type="number" name="city mpg" required>
+        <label>Popularity:</label><input type="number" name="Popularity" required>
+
+        <button type="submit">Predict Price</button>
+    </form>
+
+    <h3 id="predictionResult"></h3>
+
+    <table id="resultTable">
+        <thead>
+            <tr>
+                <th>Make</th>
+                <th>Model</th>
+                <th>Fuel Type</th>
+                <th>HP</th>
+                <th>Cylinders</th>
+                <th>Transmission</th>
+                <th>Driven Wheels</th>
+                <th>Doors</th>
+                <th>Category</th>
+                <th>Size</th>
+                <th>Style</th>
+                <th>Highway MPG</th>
+                <th>City MPG</th>
+                <th>Popularity</th>
+                <th>Predicted Price</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        document.getElementById('carForm').onsubmit = async function(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(this);
+            const response = await fetch('/predict', { method: 'POST', body: formData });
+            const result = await response.json();
+
+            document.getElementById('predictionResult').textContent = "Predicted Price: " + result["Predicted Price"];
+
+            const tbody = document.querySelector("#resultTable tbody");
+            const row = document.createElement("tr");
+
+            // Correct order of values to match table headers
+            const fields = ["Make", "Model", "Engine Fuel Type", "Engine HP", "Engine Cylinders", 
+                            "Transmission Type", "Driven_Wheels", "Number of Doors", "Market Category", 
+                            "Vehicle Size", "Vehicle Style", "highway MPG", "city mpg", "Popularity"];
+
+            fields.forEach(field => {
+                const cell = document.createElement("td");
+                cell.textContent = formData.get(field);
+                row.appendChild(cell);
+            });
+
+            // Add predicted price at the end
+            const priceCell = document.createElement("td");
+            priceCell.textContent = result["Predicted Price"];
+            row.appendChild(priceCell);
+
+            tbody.appendChild(row);
+        };
+    </script>
+
+</body>
+</html>

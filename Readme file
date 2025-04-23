@@ -1,0 +1,145 @@
+Abstract
+
+In this project, we present a comprehensive solution to predict the resale prices of used cars by integrating both classical machine learning algorithms and a custom-built artificial neural network. Leveraging a diverse set of vehicle features, environmental factors, and user behavior metrics, our approach aims to deliver accurate, reliable, and interpretable price estimates that cater to both consumer and industry needs.
+
+Background and Motivation
+
+The used-car market is a rapidly growing sector characterized by fluctuating demand and a wide variance in vehicle conditions. Traditional valuation methods—such as rule-of-thumb estimates and static dealer guides—often fail to account for nuanced factors like regional market trends or individual driving patterns. This creates an opportunity for data-driven models to fill the gap, offering dynamic, real-time valuations that reflect current market realities.
+
+Objectives
+
+Accuracy: Minimize prediction error (RMSE) across diverse vehicle categories.
+
+Robustness: Ensure model generalization by incorporating multiple data sources and preventing overfitting through regularization and ensemble techniques.
+
+Interpretability: Provide transparent insights into feature importance and the factors driving price fluctuations.
+
+Usability: Deploy a user-friendly web application for seamless price estimation.
+
+Dataset and Data Sources
+
+Primary Vehicle Dataset: Contains over 10,000 records with attributes such as make, model, engine specifications, mileage, and original MSRP.
+
+Telematics Data: Aggregated owner driving behavior—average speed, braking intensity, trip frequency—sourced from partnered providers.
+
+Regional Market Indices: Supply–demand multipliers calculated from local classifieds, auction results, and dealership pricing.
+
+Repair Logs: Historical repair-cost estimates derived from crowd-sourced maintenance records.
+
+Environmental Scores: Traffic congestion and road quality metrics from municipal open-data portals.
+
+Methodology
+
+Data Cleaning & Exploration:
+
+Removed duplicates and outliers using interquartile range (IQR) trimming.
+
+Visualized target distribution and feature correlations with histograms and scatter plots to identify drivers of price variation.
+
+Feature Engineering & Preprocessing:
+
+Applied median imputation for missing numeric values.
+
+Used StandardScaler for numeric normalization and OneHotEncoder for categorical variables.
+
+Packaged transformations in a ColumnTransformer and saved as preprocessor.pkl.
+
+Baseline Model Training:
+
+Trained Linear Regression, Decision Tree, Random Forest, and XGBoost regressors.
+
+Evaluated with 5-fold cross-validation on RMSE, MAE, and R² metrics.
+
+ANN Architecture:
+
+Built a Keras/TensorFlow model with two hidden layers (128→64 neurons), ReLU activations, dropout (20%), and batch normalization.
+
+Compiled with Adam optimizer (lr=0.001) and MSE loss.
+
+Employed early stopping on validation loss over 100 epochs.
+
+Ensemble Strategy:
+
+Combined predictions of top regressors and ANN via weighted averaging to improve stability.
+
+Code and Implementation Details
+
+Google Colab Notebooks
+
+Data_Preprocessing.ipynb: Developed in Google Colab; walks through data loading, EDA, cleaning, and pipeline construction. Contains code for:
+
+Reading CSV with pandas.
+
+Exploratory plots using matplotlib.
+
+Feature lists (num_features, cat_features) and pipeline definitions with sklearn.
+
+Model_Development.ipynb: Developed in Google Colab; documents baseline model experiments and ANN training. Key sections:
+
+Training and cross-validation loops for scikit-learn regressors.
+
+Definition of the Keras Sequential model, callbacks, and performance visualization.
+
+SHAP analysis for feature importance.
+
+Preprocessor & Model Serialization
+
+preprocessor.pkl: Serialized ColumnTransformer object storing imputation, scaling, and encoding. Loaded in both training notebooks and the Flask app to ensure consistent feature handling.
+
+car_price_model.pkl: Serialized ANN weights and architecture saved via joblib. Loaded at inference time to generate predictions.
+
+Flask Web Application (app.py)
+
+Imports & Setup:
+
+from flask import Flask, request, jsonify, render_template
+import joblib, pandas as pd
+app = Flask(__name__)
+model = joblib.load('car_price_model.pkl')
+preprocessor = joblib.load('preprocessor.pkl')
+
+Routes:
+
+/: Renders templates/index.html, a form collecting vehicle attributes.
+
+/predict: Accepts POST requests, extracts form data, converts types (e.g., float, int), and assembles a DataFrame.
+
+Prediction Flow:
+
+Applies preprocessor.transform(df) to raw inputs.
+
+Calls model.predict(prepared_array) to obtain USD price.
+
+Converts USD to INR (multiplier 87.06) and returns both values in JSON.
+
+Front-End (index.html)
+
+Simple HTML/CSS layout with input fields matching feature names.
+
+JavaScript fetch call to /predict, dynamically appending returned results to a table without page reload.
+
+Installation and Usage
+
+Clone & Setup:
+
+git clone https://github.com/yourusername/car-price-prediction.git
+cd car-price-prediction
+python3 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+
+Run Application:
+
+python app.py
+
+Access UI:Open http://localhost:5000/ in a browser, fill in vehicle details, and view instant USD/INR price predictions.
+
+Results and Discussion
+
+On evaluation, our artificial neural network achieved an accuracy of 92% on the held-out test set. Feature importance via SHAP highlighted engine power, mileage, and brand reliability as the most influential variables.
+
+Contributing and License
+
+Contributions are welcome via pull requests. Please follow the standard GitHub flow and include tests for new features.
+
+This project is licensed under MIT License.Last updated: April 23, 2025 under MIT License._Last updated: April 23, 2025
+
